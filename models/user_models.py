@@ -244,11 +244,10 @@ class wx_corpuser(models.Model):
     last_uuid_time = fields.Datetime('会话ID时间')
 
     # department, enable, english_name, hide_mobile, isleader, order, qr_code, telephone
+    alias = fields.Char('别名')
 
     _sql_constraints = [
         ('userid_key', 'UNIQUE (userid)',  '账号已存在 !'),
-        ('email_key', 'UNIQUE (email)',  '邮箱已存在 !'),
-        ('mobile_key', 'UNIQUE (mobile)',  '手机号已存在 !')
     ]
 
     def update_last_uuid(self, uuid):
@@ -274,7 +273,7 @@ class wx_corpuser(models.Model):
         if not from_subscribe:
             arg = {}
             for k,v in values.items():
-                if v!=False and k in ['mobile', 'email', 'weixinid', 'gender']:
+                if v!=False and k in ['mobile', 'email', 'weixinid', 'gender']: #'alias'
                     arg[k] = v
             arg['department'] = 1
             if 'weixinid' in arg:
@@ -293,7 +292,7 @@ class wx_corpuser(models.Model):
         objs = super(wx_corpuser, self).write(values)
         arg = {}
         for k,v in values.items():
-            if v!=False and k in ['mobile', 'email', 'weixinid', 'gender', 'name']:
+            if v!=False and k in ['mobile', 'email', 'weixinid', 'gender', 'name']: #'alias'
                 arg[k] = v
         for obj in self:
             if not (obj.mobile or obj.email):
@@ -380,7 +379,7 @@ class wx_corpuser(models.Model):
     @api.multi
     def send_text(self, text):
         from wechatpy.exceptions import WeChatClientException
-        Param = self.env['ir.config_parameter']
+        Param = self.env['ir.config_parameter'].sudo()
         for obj in self:
             try:
                 entry = corp_client.corpenv(self.env)
